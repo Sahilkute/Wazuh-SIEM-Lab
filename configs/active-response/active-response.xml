@@ -1,0 +1,80 @@
+<!-- Active Response Configuration -->
+<!-- Add this inside <ossec_config> in ossec.conf on the Wazuh Manager -->
+
+<!-- ============================================================ -->
+<!-- COMMAND DEFINITIONS                                          -->
+<!-- ============================================================ -->
+
+<!-- Block IP using firewall (Linux) -->
+<command>
+  <name>firewall-drop</name>
+  <executable>firewall-drop</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+<!-- Block IP using Windows Firewall -->
+<command>
+  <name>netsh</name>
+  <executable>netsh.exe</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+<!-- Restart Wazuh agent -->
+<command>
+  <name>restart-wazuh</name>
+  <executable>restart-wazuh</executable>
+</command>
+
+<!-- Run YARA scan -->
+<command>
+  <name>yara</name>
+  <executable>yara.sh</executable>
+  <timeout_allowed>no</timeout_allowed>
+</command>
+
+<!-- ============================================================ -->
+<!-- ACTIVE RESPONSE RULES                                        -->
+<!-- ============================================================ -->
+
+<!-- Block IP on SSH brute force (Rule 5763) -->
+<active-response>
+  <command>firewall-drop</command>
+  <location>local</location>
+  <rules_id>5763</rules_id>
+  <timeout>180</timeout>
+</active-response>
+
+<!-- Block IP on multiple auth failures (Rule 5712) -->
+<active-response>
+  <command>firewall-drop</command>
+  <location>local</location>
+  <rules_id>5712</rules_id>
+  <timeout>180</timeout>
+</active-response>
+
+<!-- Trigger YARA scan on FIM events -->
+<active-response>
+  <command>yara</command>
+  <location>local</location>
+  <rules_group>syscheck</rules_group>
+  <timeout>60</timeout>
+</active-response>
+
+<!--
+  HOW IT WORKS:
+  - When a rule fires, Wazuh triggers the defined active response command
+  - Commands can run on the manager, agent (local), or all agents
+  - Timeout = how long the block stays active (seconds), 0 = permanent
+
+  LOCATION OPTIONS:
+  - local     : Run on the agent that generated the alert
+  - server    : Run on the Wazuh manager
+  - defined-agent : Run on a specific agent
+  - all       : Run on all agents
+
+  USEFUL RULES TO TRIGGER ACTIVE RESPONSE:
+  - 5763  : SSH brute force
+  - 5712  : Multiple auth failures
+  - 87105 : VirusTotal malicious file detected
+  - 108502: YARA malware match
+-->
