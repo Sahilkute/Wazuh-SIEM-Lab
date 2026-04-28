@@ -1,1 +1,38 @@
+<!-- Windows 11 FIM Configuration -->
+<!-- Add this inside <ossec_config> in ossec.conf on the Windows agent -->
 
+<syscheck>
+
+  <!-- Enable FIM -->
+  <disabled>no</disabled>
+
+  <!-- Scan frequency in seconds (every 12 hours) -->
+  <frequency>43200</frequency>
+
+  <!-- Scan on startup -->
+  <scan_on_start>yes</scan_on_start>
+
+  <!-- Enable real-time monitoring -->
+  <directories realtime="yes" report_changes="yes" check_all="yes">C:\Users</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">C:\Windows\System32</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">C:\Program Files</directories>
+  <directories realtime="yes" report_changes="yes" check_all="yes">C:\Program Files (x86)</directories>
+
+  <!-- Ignore these directories -->
+  <ignore>C:\Windows\System32\LogFiles</ignore>
+  <ignore>C:\Windows\System32\wbem\Logs</ignore>
+  <ignore>C:\Windows\Temp</ignore>
+  <ignore>C:\Users\Default</ignore>
+
+  <!-- Monitor Windows Registry -->
+  <windows_registry>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run</windows_registry>
+  <windows_registry>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce</windows_registry>
+  <windows_registry>HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services</windows_registry>
+
+  <!-- Alert on new files -->
+  <alert_new_files>yes</alert_new_files>
+
+  <!-- Remove old diff files -->
+  <remove_old_diff>yes</remove_old_diff>
+
+</syscheck>
