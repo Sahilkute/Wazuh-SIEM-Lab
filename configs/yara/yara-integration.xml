@@ -1,0 +1,44 @@
+<!-- YARA Integration Configuration -->
+<!-- This config is used on the Wazuh Manager (ossec.conf) -->
+
+<!-- Step 1: Define the Active Response command to run YARA -->
+<command>
+  <name>yara</name>
+  <executable>yara.sh</executable>
+  <timeout_allowed>no</timeout_allowed>
+</command>
+
+<!-- Step 2: Trigger YARA scan via Active Response on FIM events -->
+<active-response>
+  <command>yara</command>
+  <location>local</location>
+
+  <!-- Trigger on FIM add/modify events -->
+  <rules_group>syscheck</rules_group>
+
+  <timeout>60</timeout>
+</active-response>
+
+<!--
+  HOW IT WORKS:
+  1. FIM detects a new or modified file
+  2. Active Response triggers yara.sh on the agent
+  3. YARA scans the file against loaded rulesets
+  4. If matched, Wazuh generates an alert (Rule: 108502)
+
+  YARA SCRIPT LOCATION ON AGENT:
+  - Linux : /var/ossec/active-response/bin/yara.sh
+  - Windows: C:\Program Files (x86)\ossec-agent\active-response\bin\yara.bat
+
+  YARA RULES LOCATION ON AGENT:
+  - Linux : /tmp/yara/rules/
+  - Windows: C:\Program Files (x86)\ossec-agent\active-response\bin\yara\rules\
+
+  USEFUL ALERT RULES:
+  - 108501 : YARA scan triggered
+  - 108502 : YARA rule matched (malware detected)
+
+  REFERENCES:
+  - Public YARA rules: https://github.com/Yara-Rules/rules
+  - Wazuh YARA guide: https://documentation.wazuh.com/current/proof-of-concept-guide/detect-malware-yara-integration.html
+-->
