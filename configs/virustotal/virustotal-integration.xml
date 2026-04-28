@@ -1,0 +1,36 @@
+<!-- VirusTotal Integration Configuration -->
+<!-- Add this inside <ossec_config> in ossec.conf on the Wazuh Manager -->
+
+<integration>
+  <name>virustotal</name>
+
+  <!-- Your VirusTotal API Key -->
+  <api_key>YOUR_VIRUSTOTAL_API_KEY_HERE</api_key>
+
+  <!-- Trigger on FIM alerts (rule group: syscheck) -->
+  <group>syscheck</group>
+
+  <!-- Minimum alert level to trigger VirusTotal scan -->
+  <alert_format>json</alert_format>
+
+</integration>
+
+<!--
+  HOW IT WORKS:
+  - When FIM detects a new or modified file, Wazuh triggers this integration
+  - The file hash (MD5/SHA1/SHA256) is sent to VirusTotal API
+  - If VirusTotal flags the file as malicious, a new alert is generated
+  - Rule 87105 fires when a malicious file is found
+
+  REQUIREMENTS:
+  - Free VirusTotal API key (sign up at virustotal.com)
+  - Wazuh Manager must have internet access
+  - Install requests library: pip install requests
+
+  USEFUL RULES TRIGGERED:
+  - 87101 : VirusTotal query performed
+  - 87102 : File not found in VirusTotal database
+  - 87103 : File found, 0 engines flagged it
+  - 87104 : File found, at least 1 engine flagged it
+  - 87105 : File found, multiple engines flagged it (HIGH ALERT)
+-->
