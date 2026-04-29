@@ -142,9 +142,9 @@ Wazuh-SIEM-Lab/
 
 ## 👤 Author
 
-**Your Name**
-- 🔗 [LinkedIn](https://linkedin.com/in/yourprofile)
-- 🐙 [GitHub](https://github.com/yourusername)
+**Sahil Kute**
+- 🔗 [LinkedIn](https://www.linkedin.com/in/sahil-kute/)
+- 🐙 [GitHub](https://github.com/Sahilkute)
 
 ---
 
