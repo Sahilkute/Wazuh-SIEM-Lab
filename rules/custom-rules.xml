@@ -1,1 +1,184 @@
+<!-- ============================================================ -->
+<!-- Custom Wazuh Rules - Wazuh SIEM Home Lab                   -->
+<!-- File: /var/ossec/etc/rules/custom-rules.xml                -->
+<!-- ============================================================ -->
 
+<group name="custom,">
+
+  <!-- ============================================================ -->
+  <!-- FIM CUSTOM RULES                                             -->
+  <!-- ============================================================ -->
+
+  <!-- Alert when a file is modified in /etc on Linux -->
+  <rule id="100001" level="10">
+    <if_group>syscheck</if_group>
+    <field name="file">/etc/</field>
+    <match>modified</match>
+    <description>Critical config file modified in /etc directory</description>
+    <mitre>
+      <id>T1565.001</id> <!-- Stored Data Manipulation -->
+    </mitre>
+    <group>fim,config_change,</group>
+  </rule>
+
+  <!-- Alert when a new file is created in /tmp on Linux -->
+  <rule id="100002" level="8">
+    <if_group>syscheck</if_group>
+    <field name="file">/tmp/</field>
+    <match>added</match>
+    <description>New file created in /tmp directory - possible malware drop</description>
+    <mitre>
+      <id>T1059</id> <!-- Command and Scripting Interpreter -->
+    </mitre>
+    <group>fim,suspicious_file,</group>
+  </rule>
+
+  <!-- Alert when a file is modified in Windows System32 -->
+  <rule id="100003" level="12">
+    <if_group>syscheck</if_group>
+    <field name="file">C:\\Windows\\System32\\</field>
+    <match>modified</match>
+    <description>Critical Windows System32 file modified - possible tampering</description>
+    <mitre>
+      <id>T1543</id> <!-- Create or Modify System Process -->
+    </mitre>
+    <group>fim,windows,critical,</group>
+  </rule>
+
+  <!-- Alert on Windows Registry Run key modification -->
+  <rule id="100004" level="12">
+    <if_group>syscheck</if_group>
+    <field name="file">HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run</field>
+    <description>Windows Registry Run key modified - possible persistence mechanism</description>
+    <mitre>
+      <id>T1547.001</id> <!-- Boot or Logon Autostart: Registry Run Keys -->
+    </mitre>
+    <group>fim,windows,persistence,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- VIRUSTOTAL CUSTOM RULES                                      -->
+  <!-- ============================================================ -->
+
+  <!-- High alert when VirusTotal flags a file -->
+  <rule id="100010" level="13">
+    <if_sid>87105</if_sid>
+    <description>VirusTotal: Malicious file detected by multiple AV engines</description>
+    <mitre>
+      <id>T1204</id> <!-- User Execution -->
+    </mitre>
+    <group>virustotal,malware,high_alert,</group>
+  </rule>
+
+  <!-- Alert when VirusTotal flags at least 1 engine -->
+  <rule id="100011" level="10">
+    <if_sid>87104</if_sid>
+    <description>VirusTotal: File flagged by at least one AV engine - investigate</description>
+    <mitre>
+      <id>T1204</id> <!-- User Execution -->
+    </mitre>
+    <group>virustotal,malware,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- YARA CUSTOM RULES                                            -->
+  <!-- ============================================================ -->
+
+  <!-- Critical alert on YARA match -->
+  <rule id="100020" level="14">
+    <if_sid>108502</if_sid>
+    <description>YARA: Malware pattern matched - immediate action required</description>
+    <mitre>
+      <id>T1059</id> <!-- Command and Scripting Interpreter -->
+    </mitre>
+    <group>yara,malware,critical,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- AUTHENTICATION CUSTOM RULES                                  -->
+  <!-- ============================================================ -->
+
+  <!-- Multiple failed SSH logins -->
+  <rule id="100030" level="10">
+    <if_sid>5712</if_sid>
+    <same_source_ip/>
+    <description>Multiple SSH authentication failures from same IP - possible brute force</description>
+    <mitre>
+      <id>T1110</id> <!-- Brute Force -->
+    </mitre>
+    <group>authentication,brute_force,</group>
+  </rule>
+
+  <!-- Successful login after multiple failures (possible compromise) -->
+  <rule id="100031" level="14">
+    <if_sid>5715</if_sid>
+    <same_source_ip/>
+    <description>Successful SSH login after multiple failures - possible account compromise</description>
+    <mitre>
+      <id>T1110</id> <!-- Brute Force -->
+    </mitre>
+    <group>authentication,brute_force,account_compromise,</group>
+  </rule>
+
+  <!-- Failed Windows login -->
+  <rule id="100032" level="8">
+    <if_sid>60122</if_sid>
+    <description>Multiple failed Windows login attempts detected</description>
+    <mitre>
+      <id>T1110</id> <!-- Brute Force -->
+    </mitre>
+    <group>authentication,windows,brute_force,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- VULNERABILITY DETECTION CUSTOM RULES                         -->
+  <!-- ============================================================ -->
+
+  <!-- Critical vulnerability detected -->
+  <rule id="100040" level="15">
+    <if_sid>23504</if_sid>
+    <description>Critical CVE vulnerability detected on agent - immediate patching required</description>
+    <mitre>
+      <id>T1190</id> <!-- Exploit Public-Facing Application -->
+    </mitre>
+    <group>vulnerability,critical,</group>
+  </rule>
+
+  <!-- High vulnerability detected -->
+  <rule id="100041" level="10">
+    <if_sid>23503</if_sid>
+    <description>High severity CVE vulnerability detected on agent</description>
+    <mitre>
+      <id>T1190</id> <!-- Exploit Public-Facing Application -->
+    </mitre>
+    <group>vulnerability,high,</group>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- SUSPICIOUS ACTIVITY CUSTOM RULES                             -->
+  <!-- ============================================================ -->
+
+  <!-- Netcat usage detected on Linux -->
+  <rule id="100050" level="12">
+    <if_group>syslog</if_group>
+    <match>nc -e|ncat|netcat</match>
+    <description>Possible reverse shell attempt detected - netcat usage</description>
+    <mitre>
+      <id>T1059.004</id> <!-- Unix Shell -->
+    </mitre>
+    <group>suspicious,reverse_shell,</group>
+  </rule>
+
+  <!-- Sudo privilege escalation -->
+  <rule id="100051" level="10">
+    <if_group>syslog</if_group>
+    <match>sudo</match>
+    <field name="user">^(?!root$)</field>
+    <description>Non-root user executed sudo command - monitor for privilege escalation</description>
+    <mitre>
+      <id>T1548.003</id> <!-- Sudo and Sudo Caching -->
+    </mitre>
+    <group>suspicious,privilege_escalation,</group>
+  </rule>
+
+</group>
